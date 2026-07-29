@@ -45,6 +45,10 @@ from core import MissingParameterError, System
 from schwarzschild import circular_orbit_dE_da
 from visualization import plot_orbit_panels
 
+from quadrupole import mass_quadrupole
+from waveform import strain_plus_cross
+from waveform_visualization import plot_chirp_spectrogram, plot_power_spectrum, plot_strain_timeseries
+
 # Fraction of the ISCO radius (6M) at which the adiabatic sequence-of-
 # circular-orbits approximation is stopped, since dE/da -> 0 there and da/dt
 # formally diverges (see module docstring).
@@ -69,11 +73,14 @@ class SchwarzschildAdiabaticInspiral(System):
     """
 
     REQUIRED_PARAMETERS = (
-        "M",       # black hole mass
-        "mu",      # orbiting particle's mass (test-particle limit: mu << M)
-        "a0",      # initial orbital radius (a0 > 6M for a stable start)
-        "phi0",    # initial azimuthal angle
-        "t_max",   # coordinate time to integrate to
+        "M",         # black hole mass
+        "mu",        # orbiting particle's mass (test-particle limit: mu << M)
+        "a0",        # initial orbital radius (a0 > 6M for a stable start)
+        "phi0",      # initial azimuthal angle
+        "t_max",     # coordinate time to integrate to
+        "theta_obs", # observer polar angle, for strain_plus_cross (no default -- see waveform.py)
+        "phi_obs",   # observer azimuthal angle, for strain_plus_cross
+        "D",         # observer distance, for strain_plus_cross
     )
 
     def validate(self, params: Dict[str, Any]) -> None:
@@ -125,6 +132,14 @@ class SchwarzschildAdiabaticInspiral(System):
         Rddot = np.gradient(Rdot, dt)
         phiddot = np.gradient(phidot, dt)
 
+        # Downstream quadrupole pipeline (see module docstring): the
+        # trajectory alone is spacetime/observer-agnostic, so Qddot is always
+        # computed here; strain_plus_cross needs an observer direction and is
+        # deferred to visualize() (theta_obs/phi_obs/D pulled from `params`
+        # there via .get(), so this stays optional for callers -- like the
+        # tests -- that only want the trajectory).
+        _, Qddot = mass_quadrupole(a, phi, Rdot, phidot, Rddot, phiddot, mu, M)
+
         return {
             "t": t,
             "r": a,
@@ -133,8 +148,14 @@ class SchwarzschildAdiabaticInspiral(System):
             "phidot": phidot,
             "Rddot": Rddot,
             "phiddot": phiddot,
+            "Qddot": Qddot,
             "reached_isco": reached_isco,
-            "params": {"M": M, "mu": mu, "a0": params["a0"], "phi0": params["phi0"]},
+            "params": {
+                "M": M, "mu": mu, "a0": params["a0"], "phi0": params["phi0"],
+                "theta_obs": params.get("theta_obs"),
+                "phi_obs": params.get("phi_obs"),
+                "D": params.get("D"),
+            },
         }
 
     def visualize(self, result: Dict[str, np.ndarray]) -> None:
@@ -152,4 +173,29 @@ class SchwarzschildAdiabaticInspiral(System):
             time_label="t (coordinate time)",
             title="Schwarzschild adiabatic inspiral (radiation reaction)",
             filename=filename,
+        )
+
+        h_plus, h_cross = strain_plus_cross(result["Qddot"], p["theta_obs"], p["phi_obs"], p["D"])
+        wave_stem = (
+            f"schwarzschild_inspiral_M{p['M']:g}_mu{p['mu']:g}"
+            f"_a0{p['a0']:g}_phi0{p['phi0']:g}"
+        )
+        plot_strain_timeseries(
+            result["t"], h_plus, h_cross,
+            filename=f"{wave_stem}_strain.png",
+            title="Adiabatic inspiral GW strain",
+        )
+        # A single FFT peak isn't meaningful for a chirp (the frequency isn't
+        # stationary), but the broadband spectrum is still worth plotting
+        # alongside the spectrogram, which shows the rising frequency
+        # directly -- per waveform_visualization.py's docstrings.
+        plot_power_spectrum(
+            result["t"], h_plus,
+            filename=f"{wave_stem}_spectrum.png",
+            title="Adiabatic inspiral strain power spectrum",
+        )
+        plot_chirp_spectrogram(
+            result["t"], h_plus,
+            filename=f"{wave_stem}_spectrogram.png",
+            title="Adiabatic inspiral chirp spectrogram",
         )

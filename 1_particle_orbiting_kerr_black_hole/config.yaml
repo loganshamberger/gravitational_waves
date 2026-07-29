@@ -171,3 +171,10 @@ simulations:
       phi0: 0.0
       t_max: 200000.0
       n_steps: 200000
+      # Observer direction/distance for strain_plus_cross -- no default
+      # exists (see radiation/waveform.py), so these must be stated
+      # explicitly. Values match the convention used in
+      # radiation/test_waveform_visualization.py.
+      theta_obs: 1.0471975511965976  # pi / 3
+      phi_obs: 0.0
+      D: 1000.0
