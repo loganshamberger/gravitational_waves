@@ -69,6 +69,31 @@ def _coordinate_time_derivatives(r, pr, M, E, h, rs):
     return Rdot, phidot, Rddot, phiddot
 
 
+def circular_orbit_E_h(M, a):
+    """Exact specific energy and angular momentum of a Schwarzschild circular
+    orbit at areal radius a (only defined for a > 3M; physically stable only
+    for a >= 6M, the ISCO).
+    """
+    h2 = M * a**2 / (a - 3 * M)
+    E2 = (a - 2 * M) ** 2 / (a * (a - 3 * M))
+    return np.sqrt(E2), np.sqrt(h2)
+
+
+def circular_orbit_dE_da(M, a):
+    """d(specific energy)/da for a Schwarzschild circular orbit, from
+    differentiating circular_orbit_E_h's E(a)^2 closed form analytically.
+    Used by the adiabatic-inspiral radiation-reaction module to convert an
+    energy-loss rate into a rate of change of orbital radius.
+    """
+    E, _ = circular_orbit_E_h(M, a)
+    f = (a - 2 * M) ** 2
+    g = a * (a - 3 * M)
+    df_da = 2 * (a - 2 * M)
+    dg_da = 2 * a - 3 * M
+    dE2_da = (df_da * g - f * dg_da) / g**2
+    return dE2_da / (2 * E)
+
+
 class SchwarzschildGeodesic(System):
     """Timelike geodesic of a massive test particle in Schwarzschild spacetime.
 
