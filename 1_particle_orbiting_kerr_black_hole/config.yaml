@@ -137,3 +137,37 @@ simulations:
       phi0: 0.0
       dr_dlambda0: -1.0
       lambda_max: 19.0
+
+  # --- Gravitational-wave quadrupole radiation additions (radiation/) ---
+
+  # Coordinate-time integrator on a circular orbit (a=20M): same physics as
+  # SchwarzschildGeodesic, reparameterized in t instead of tau since t is the
+  # natural time variable for a GW waveform. Feed this trajectory's r, phi,
+  # Rdot, phidot, Rddot, phiddot through radiation.quadrupole.mass_quadrupole
+  # -> radiation.waveform.strain_plus_cross to get h_+/h_x (see
+  # radiation/test_waveform_visualization.py for the full pipeline).
+  - kind: schwarzschild_massive_coord_time
+    params:
+      M: 1.0
+      E: 0.9761871
+      h: 4.8507125
+      r0: 20.0
+      phi0: 0.0
+      dr_dtau0: 0.0
+      t_max: 4500.0
+
+  # Adiabatic inspiral (radiation/inspiral.py): starts on a circular orbit at
+  # a0=8M, just above the ISCO (6M), and evolves a(t)/phi(t) under quadrupole
+  # radiation reaction until the ISCO-proximity stopping event fires. Produces
+  # the chirp: orbital frequency rises from ~0.007 to ~0.011 (in G=c=1 units)
+  # before the adiabatic approximation breaks down at plunge. Same downstream
+  # pipeline (mass_quadrupole -> strain_plus_cross) as above, but on a
+  # decaying rather than fixed orbit.
+  - kind: schwarzschild_adiabatic_inspiral
+    params:
+      M: 1.0
+      mu: 0.001
+      a0: 8.0
+      phi0: 0.0
+      t_max: 200000.0
+      n_steps: 200000
