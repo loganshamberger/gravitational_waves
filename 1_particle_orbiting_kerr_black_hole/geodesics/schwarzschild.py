@@ -13,6 +13,8 @@ import numpy as np
 from scipy.integrate import solve_ivp
 
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "shared"))
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "utils"))
+
 from core import MissingParameterError, System
 from visualization import plot_orbit_panels
 

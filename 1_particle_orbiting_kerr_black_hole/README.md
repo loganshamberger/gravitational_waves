@@ -5,7 +5,7 @@ orbits first (the non-rotating special case), then generalize.
 
 ## Contents
 
-- **`schwarzschild_geodesics_report.md`** — research notes distilled from the
+- **`notes/schwarzschild_geodesics_report.md`** — research notes distilled from the
   [Wikipedia article on Schwarzschild geodesics](https://en.wikipedia.org/wiki/Schwarzschild_geodesics):
   the metric, the distinction between coordinate time and proper time, the two
   conserved quantities (specific energy `E` and specific angular momentum `h`),
@@ -17,15 +17,15 @@ orbits first (the non-rotating special case), then generalize.
 - **`../shared/core.py`** — the reusable framework: `System` (ABC), `Runner`,
   `run_from_config`, and the error types. No physics here — it lives outside
   this exercise's directory so future exercises (e.g. a Kerr simulator) can
-  import it unchanged. `simulator.py` and `schwarzschild.py` add `../shared`
-  to `sys.path` before importing it.
+  import it unchanged. `simulator.py` and `geodesics/schwarzschild.py` add
+  `../shared` to `sys.path` before importing it.
 
-- **`visualization.py`** — shared plotting: `plot_orbit_panels` renders the
-  standard 3-panel (r vs. time, φ vs. time, orbit) figure, and every figure
-  is written under `visualizations/` (created automatically).
+- **`utils/visualization.py`** — shared plotting: `plot_orbit_panels` renders
+  the standard 3-panel (r vs. time, φ vs. time, orbit) figure, and every
+  figure is written under `visualizations/` (created automatically).
 
-- **`schwarzschild.py`** — the two Schwarzschild `System` implementations
-  (physics only; imports `core` and `visualization`).
+- **`geodesics/schwarzschild.py`** — the two Schwarzschild `System`
+  implementations (physics only; imports `core` and `visualization`).
 
 - **`simulator.py`** — thin entry point: imports `core` + `schwarzschild`,
   declares `SYSTEM_REGISTRY`, and runs the CLI.
@@ -48,7 +48,7 @@ System (ABC)                                     [../shared/core.py]
 Runner(system)                                   [../shared/core.py]
   run(params) = system.validate(params); return system.simulate(params)
 
-plot_orbit_panels(...)                           [visualization.py]
+plot_orbit_panels(...)                           [utils/visualization.py]
   shared r/phi/orbit figure, saved under visualizations/
 ```
 
@@ -57,11 +57,11 @@ Each concrete `System` declares its own required parameters and validates
 itself; `Runner` just enforces that validation happens before `simulate()`
 ever runs. `core.py` has no Schwarzschild-specific code and lives in
 `../shared/`, so a Kerr (or any other) exercise can import it directly
-instead of re-implementing the framework. `visualization.py` stays local to
-this exercise for now (it saves to this exercise's own `visualizations/`
-folder) but is likewise Schwarzschild-agnostic.
+instead of re-implementing the framework. `utils/visualization.py` stays
+local to this exercise for now (it saves to this exercise's own
+`visualizations/` folder) but is likewise Schwarzschild-agnostic.
 
-Two systems currently implement this interface (in `schwarzschild.py`):
+Two systems currently implement this interface (in `geodesics/schwarzschild.py`):
 
 - **`SchwarzschildGeodesic`** — timelike geodesic of a massive test particle.
   Integrated in proper time `τ`. Params: `M, E, h, r0, phi0, dr_dtau0, tau_max`.
@@ -77,7 +77,7 @@ Newtonian `-M/r²` term for massless photons) using `scipy.integrate.solve_ivp`
 crosses the event horizon. Every run logs `rs = 2M` and its full parameter
 dict at the start.
 
-`visualize()` calls `plot_orbit_panels()` (`visualization.py`), producing a
+`visualize()` calls `plot_orbit_panels()` (`utils/visualization.py`), producing a
 3-panel figure per run: `r` vs. time, `φ` vs. time, and the actual orbit
 `(r cos φ, r sin φ)` in the equatorial plane with the horizon drawn as a
 filled disk. Files are named after their physical parameters, e.g.
@@ -87,8 +87,8 @@ filled disk. Files are named after their physical parameters, e.g.
 ## Batch runs from YAML
 
 `simulator.py` declares `SYSTEM_REGISTRY`, mapping a `kind` string to a
-`System` class, and passes it to `core.run_from_config`, which reads a YAML
-file shaped like:
+`System` class, and passes it to `run_from_config` (from `../shared/core.py`),
+which reads a YAML file shaped like:
 
 ```yaml
 simulations:

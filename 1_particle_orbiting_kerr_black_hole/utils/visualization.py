@@ -11,7 +11,7 @@ import os
 import matplotlib.pyplot as plt
 import numpy as np
 
-VISUALIZATION_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "visualizations")
+VISUALIZATION_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..","visualizations")
 
 
 def output_path(filename: str) -> str:
