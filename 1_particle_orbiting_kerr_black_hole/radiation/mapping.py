@@ -30,6 +30,27 @@ def radial_mapping(r, M, mapping="boyer_lindquist"):
     raise ValueError(f"Unknown mapping {mapping!r}; expected one of {MAPPINGS}")
 
 
+def radial_mapping_derivatives(r, M, mapping="boyer_lindquist"):
+    """Return (dR/dr, d^2R/dr^2) for the given mapping.
+
+    Needed to convert the geodesic integrator's r-derivatives (Rdot, Rddot
+    as returned by schwarzschild.py, which are really rdot/rddot of the areal
+    radius) into time-derivatives of the mapped flat-space radius R, via the
+    chain rule: dR/dt = (dR/dr) rdot, d2R/dt2 = (d2R/dr2) rdot^2 + (dR/dr) rddot.
+    """
+    r = np.asarray(r, dtype=float)
+    if mapping == "boyer_lindquist":
+        return np.ones_like(r), np.zeros_like(r)
+    if mapping == "harmonic":
+        return np.ones_like(r), np.zeros_like(r)
+    if mapping == "isotropic":
+        g = np.sqrt(r**2 - 2 * M * r)
+        dR_dr = 0.5 * (1 + (r - M) / g)
+        d2R_dr2 = -(M**2) / (2 * g**3)
+        return dR_dr, d2R_dr2
+    raise ValueError(f"Unknown mapping {mapping!r}; expected one of {MAPPINGS}")
+
+
 def equatorial_cartesian(r, phi, M, mapping="boyer_lindquist"):
     """Flat-space pseudo-Cartesian (x, y) for an equatorial (theta=pi/2) orbit."""
     R = radial_mapping(r, M, mapping)

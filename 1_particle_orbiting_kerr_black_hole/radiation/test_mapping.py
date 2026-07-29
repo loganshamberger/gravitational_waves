@@ -1,7 +1,7 @@
 import numpy as np
 import pytest
 
-from mapping import MAPPINGS, equatorial_cartesian, radial_mapping
+from mapping import MAPPINGS, equatorial_cartesian, radial_mapping, radial_mapping_derivatives
 
 
 def test_unknown_mapping_raises():
@@ -63,3 +63,27 @@ def test_equatorial_cartesian_vectorized_shapes():
     x, y = equatorial_cartesian(r, phi, M)
     assert x.shape == r.shape
     assert y.shape == r.shape
+
+
+@pytest.mark.parametrize("mapping", MAPPINGS)
+def test_radial_mapping_derivatives_match_finite_difference(mapping):
+    M = 1.0
+    r = np.linspace(6.5, 40.0, 30)
+    dr = 1e-3
+    dR_dr, d2R_dr2 = radial_mapping_derivatives(r, M, mapping)
+
+    R_plus = radial_mapping(r + dr, M, mapping)
+    R_minus = radial_mapping(r - dr, M, mapping)
+    dR_dr_fd = (R_plus - R_minus) / (2 * dr)
+    d2R_dr2_fd = (R_plus - 2 * radial_mapping(r, M, mapping) + R_minus) / dr**2
+
+    assert np.allclose(dR_dr, dR_dr_fd, atol=1e-6, rtol=1e-6)
+    assert np.allclose(d2R_dr2, d2R_dr2_fd, atol=1e-3, rtol=1e-3)
+
+
+def test_boyer_lindquist_and_harmonic_derivatives_are_trivial():
+    r = np.array([6.0, 10.0, 100.0])
+    for mapping in ("boyer_lindquist", "harmonic"):
+        dR_dr, d2R_dr2 = radial_mapping_derivatives(r, M=1.0, mapping=mapping)
+        assert np.all(dR_dr == 1.0)
+        assert np.all(d2R_dr2 == 0.0)
