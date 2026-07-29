@@ -1,0 +1,139 @@
+simulations:
+  - kind: schwarzschild_massive
+    params:
+      M: 1.0
+      E: 0.95
+      h: 4.0
+      r0: 10.0
+      phi0: 0.0
+      dr_dtau0: 0.0
+      tau_max: 500.0
+
+  - kind: schwarzschild_massive
+    params:
+      M: 2.0
+      E: 1
+      h: 10
+      r0: 24.0
+      phi0: 0.0
+      dr_dtau0: 0.0
+      tau_max: 800.0
+
+  - kind: schwarzschild_photon
+    params:
+      M: 1.0
+      b: 6.0
+      r0: 30.0
+      phi0: 0.0
+      dr_dlambda0: -0.99
+      lambda_max: 80.0
+
+  - kind: schwarzschild_photon
+    params:
+      M: 1.0
+      b: 5.0
+      r0: 30.0
+      phi0: 0.0
+      dr_dlambda0: -0.99
+      lambda_max: 80.0
+
+  # --- Regimes identified in the Schwarzschild geodesics research report ---
+
+  # Weak-field / Mercury-like: wide, nearly-circular orbit. Precession per
+  # orbit should approach the perturbative formula delta_phi ~ 6*pi*M/(A(1-e^2)).
+  - kind: schwarzschild_massive
+    params:
+      M: 1.0
+      E: 0.995086
+      h: 10.2
+      r0: 100.0
+      phi0: 0.0
+      dr_dtau0: 0.0
+      tau_max: 8000.0
+
+  # High-eccentricity bound orbit: swings from r0=30M in close to the strong
+  # field region each period; precession accumulates fast, good long-run
+  # conservation-of-E/h check.
+  - kind: schwarzschild_massive
+    params:
+      M: 1.0
+      E: 0.975965
+      h: 4.3
+      r0: 30.0
+      phi0: 0.0
+      dr_dtau0: 0.0
+      tau_max: 1500.0
+
+  # ISCO circular orbit (r = 6M): marginally stable. In an ideal integrator
+  # it stays circular forever; numerical drift should show up as slow decay
+  # inward or outward rather than sudden divergence.
+  - kind: schwarzschild_massive
+    params:
+      M: 1.0
+      E: 0.942809
+      h: 3.4641016
+      r0: 6.0
+      phi0: 0.0
+      dr_dtau0: 0.0
+      tau_max: 3000.0
+
+  # Unstable circular orbit between the photon sphere (3M) and ISCO (6M).
+  # Exact initial conditions balance on a knife's edge; expect it to plunge
+  # or fly outward once numerical error accumulates.
+  - kind: schwarzschild_massive
+    params:
+      M: 1.0
+      E: 0.9622504
+      h: 3.6742346
+      r0: 4.5
+      phi0: 0.0
+      dr_dtau0: 0.0
+      tau_max: 200.0
+
+  # Marginally bound circular orbit (E = 1, r = 4M): the E=1 boundary
+  # between bound and unbound orbits, and also unstable.
+  - kind: schwarzschild_massive
+    params:
+      M: 1.0
+      E: 1.0
+      h: 4.0
+      r0: 4.0
+      phi0: 0.0
+      dr_dtau0: 0.0
+      tau_max: 200.0
+
+  # Radial plunge: zero angular momentum free-fall from rest at infinity
+  # (E=1, h=0). Closed-form comparison case; coordinate time t should
+  # diverge near r=rs while proper time stays finite.
+  - kind: schwarzschild_massive
+    params:
+      M: 1.0
+      E: 1.0
+      h: 0.0
+      r0: 20.0
+      phi0: 0.0
+      dr_dtau0: -0.3162278
+      tau_max: 40.0
+
+  # Photon near the critical impact parameter (b_crit = 3*sqrt(3) ~= 5.196).
+  # Extreme light bending: passes close to the photon sphere before
+  # escaping. Sensitive to step size/numerical accuracy.
+  - kind: schwarzschild_photon
+    params:
+      M: 1.0
+      b: 5.25
+      r0: 30.0
+      phi0: 0.0
+      dr_dlambda0: -0.9856047
+      lambda_max: 200.0
+
+  # Photon radial infall (b=0): straight-line fall into the horizon: dr/dlambda
+  # stays constant, a simple closed-form sanity check for the integrator.
+  - kind: schwarzschild_photon
+    params:
+      M: 1.0
+      b: 0.0
+      r0: 20.0
+      phi0: 0.0
+      dr_dlambda0: -1.0
+      lambda_max: 19.0
