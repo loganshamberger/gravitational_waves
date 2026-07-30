@@ -25,17 +25,19 @@ logger = logging.getLogger(__name__)
 # dt/dtau diverges.
 _HORIZON_FRACTION = 1.001
 
-
+#Confirmed in MTW Gravitation p 660
 def _dt_dtau(r, E, rs):
     """Gravitational redshift factor: coordinate-time rate per unit proper time."""
     return E / (1 - rs / r)
 
-
+#confirmed in MTW Gravitation p 660
 def _dphi_dtau(r, h):
     """Angular rate per unit proper time (specific angular momentum conservation)."""
     return h / r**2
 
-
+# NEED TO VERIFY: Claude initially has taken the second derivative of r with respect to 
+# proper time. This doesn't seem to line up with MTW at first blush
+# I need to convince myself this is right
 def _dpr_dtau(r, M, h):
     """Radial geodesic acceleration, d(dr/dtau)/dtau, from the effective potential."""
     return -M / r**2 + h**2 / r**3 - 3 * M * h**2 / r**4
@@ -68,6 +70,11 @@ def _coordinate_time_derivatives(r, pr, M, E, h, rs):
 
     return Rdot, phidot, Rddot, phiddot
 
+# Open Question: does MTW Gravitation's analysis on page 668 mesh with this?
+# Orbits look okay, but could this just be a happy coincidence? I need to manually verify the math 
+# and investigate further. It also feels like the eccentricity stuff could have 
+# been handled from the outset. I used Sonnet to generate this, so maybe that consideraation isn't in 
+# its tensors.
 
 def circular_orbit_E_h(M, a):
     """Exact specific energy and angular momentum of a Schwarzschild circular
