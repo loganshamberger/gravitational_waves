@@ -1,0 +1,3 @@
+injected at t = 3.7334 s
+recovered at t = 3.7334 s (error +0.00 ms)
+peak SNR 23.26 over a 8s segment

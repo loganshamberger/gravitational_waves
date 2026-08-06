@@ -1,0 +1,1 @@
+steady state: throughput 3.612/day, utilisation 0.036
